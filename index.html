@@ -129,37 +129,63 @@ function ca(a) { const d = a * 180 / Math.PI; if (Math.abs(d) < 0.01) return 0; 
 return { pos: [x, y, z], rot: [ca(rx), ca(ry), ca(rz)] };
 }
 const matToTex = {
-'256': null,
-'272': null,
-'288': null,
-'304': 'imgs/woodenplanks.png',
-'320': 'imgs/slate.png',
-'336': 'imgs/concrete.png',
-'352': 'imgs/metal.png',
-'368': 'imgs/diamondplate.png',
-'384': null,
-'400': 'imgs/grass.png',
-'416': 'imgs/ice.png',
-'432': 'imgs/marble.png',
-'448': 'imgs/granite.png',
-'464': 'imgs/brick.png',
-'480': 'imgs/pebble.png',
-'496': 'imgs/sand.png',
-'512': null,
-'528': 'imgs/metal.png',
-'544': 'imgs/woodenplanks.png',
-'560': 'imgs/cobblestone.png',
-'576': null,
-'608': null,
+'256': null,                     
+'272': null,                     
+'288': null,                     
+'304': null,                     
+'320': null,                     
+'336': null,                     
+'352': null,                     
+'368': null,                     
+'384': null,                     
+'400': null,                     
+'416': null,                     
+'432': null,                     
+'448': null,                     
+'464': null,                     
+'480': null,                     
+'496': null,                     
+'512': null,                     
+'528': null,                     
+'544': null,                     
+'560': null,                     
+'576': null,                     
+'608': null,                     
 '624': null,
-Plastic: null, SmoothPlastic: null, Neon: null, ForceField: null, Glass: null,
+'1024': null,                    
+'1040': null,                    
+'1056': null,                    
+'1072': 'imgs/foil.png',         
+'1088': 'imgs/metal.png',        
+'1280': 'imgs/grass.png',        
+'1284': 'imgs/grass.png',        
+'1296': 'imgs/sand.png',         
+'1312': null,                    
+'1328': 'imgs/rock.png',         
+'1344': 'imgs/rock.png',         
+'1360': 'imgs/slate.png',        
+'1376': 'imgs/ice.png',          
+'1392': 'imgs/concrete.png',     
+'1408': 'imgs/brick.png',        
+'1424': 'imgs/pebble.png',       
+'1440': 'imgs/marble.png',       
+'1456': 'imgs/rock.png',
+'1472': 'imgs/woodenplanks.png', 
+'1488': 'imgs/woodenplanks.png', 
+'1504': 'imgs/diamondplate.png', 
+'1520': 'imgs/iron.png',         
+'1536': 'imgs/glass.png',        
+'1552': null,                    
+'1568': null,                    
+Plastic: null, SmoothPlastic: null, Neon: null, ForceField: null, Air: null, Water: null,
+Glass: 'imgs/glass.png', Foil: 'imgs/foil.png',
+Metal: 'imgs/metal.png', CorrodedMetal: 'imgs/metal.png', DiamondPlate: 'imgs/diamondplate.png',
+Grass: 'imgs/grass.png', LeafyGrass: 'imgs/grass.png', Ice: 'imgs/ice.png',
+Sand: 'imgs/sand.png', Sandstone: 'imgs/rock.png', Limestone: 'imgs/rock.png',
+Slate: 'imgs/slate.png', Concrete: 'imgs/concrete.png', Brick: 'imgs/brick.png',
+Pebble: 'imgs/pebble.png', Marble: 'imgs/marble.png', Granite: 'imgs/rock.png',
 Wood: 'imgs/woodenplanks.png', WoodPlanks: 'imgs/woodenplanks.png',
-Slate: 'imgs/slate.png', Concrete: 'imgs/concrete.png',
-CorrodedMetal: 'imgs/metal.png', DiamondPlate: 'imgs/diamondplate.png',
-Grass: 'imgs/grass.png', Ice: 'imgs/ice.png', Marble: 'imgs/marble.png',
-Granite: 'imgs/granite.png', Brick: 'imgs/brick.png', Pebble: 'imgs/pebble.png',
-Sand: 'imgs/sand.png', Metal: 'imgs/metal.png', Cobblestone: 'imgs/cobblestone.png',
-SandStone: 'imgs/sandstone.png',
+Iron: 'imgs/iron.png', Cobblestone: 'imgs/rock.png', SandStone: 'imgs/rock.png',
 };
 function processItem(itemEl, parentName, parentClass) {
 const className = itemEl.getAttribute('class') || 'Unknown';
@@ -226,7 +252,16 @@ const cfEl = getProp(propsEl, 'CoordinateFrame', 'CFrame');
 if (cfEl) {
 const cf = readCFrame(cfEl);
 obj.Position = cf.pos;
-obj.Rotation = cf.rot;
+// RoGold does not rotate the size axes — if Y rotation is ±90°,
+// swap X and Z size so the part looks correct, then clear Y rotation.
+const ry = cf.rot[1];
+if (Math.abs(Math.abs(ry) - 90) < 1) {
+  const [sx, sy, sz] = obj.Size;
+  obj.Size = [sz, sy, sx];
+  obj.Rotation = [cf.rot[0], 0, cf.rot[2]];
+} else {
+  obj.Rotation = cf.rot;
+}
 }
 const colorEl = getProp(propsEl, 'Color3uint8', 'Color3uint8') || getProp(propsEl, 'Color3uint8', 'Color') || getProp(propsEl, 'Color3', 'Color');
 obj.Color = readColor(colorEl, [0.5, 0.5, 0.5]);
